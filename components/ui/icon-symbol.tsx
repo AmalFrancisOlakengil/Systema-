@@ -14,10 +14,17 @@ type IconSymbolName = keyof typeof MAPPING;
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
 const MAPPING = {
+  // Your existing mappings
   'house.fill': 'home',
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+
+  // Add these for the Tasks and Stats screens
+  'circle': 'radio-button-unchecked',      // The "Complete" button
+  'checkmark.circle': 'check-circle',      // The "Empty" state icon
+  'gear': 'settings',                      // The "Settings" icon in Stats
+  'arrow.clockwise': 'refresh',            // For that reset button we discussed
 } as IconMapping;
 
 /**
