@@ -23,4 +23,9 @@ export interface UserProfile {
   lastWorkTimestamp: string | null; // ISO string
   dailyTasks: DailyTask[];
   lastTaskRefreshDate: string | null; // ISO string (just the date part)
+  restDayTokens: number;
+  streakCount: number;
+  lastRerollDate: string | null; // ISO string (just date part)
+  lastBioEvolutionDate: string | null; // ISO string (just date part)
+  completedTaskDates: string[]; // Array of ISO date strings (just date part)
 }

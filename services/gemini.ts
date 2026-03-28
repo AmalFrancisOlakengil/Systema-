@@ -75,4 +75,51 @@ export class GeminiService {
       return [];
     }
   }
+
+  async evolveBio(currentBio: string, completedTasks: string[], currentExp: ExpLevels): Promise<string> {
+    const prompt = `
+      The user's current bio is: "${currentBio}".
+      In the last week, they completed these tasks: ${JSON.stringify(completedTasks)}.
+      Their current stats are: ${JSON.stringify(currentExp)}.
+      Suggest a "Bio Evolution" - a slightly updated version of their bio that reflects their growth, 
+      making their journey feel more specialized or advanced. Keep it concise (1-2 sentences).
+      Return ONLY the new bio text.
+    `;
+
+    try {
+      const result = await this.model.generateContent(prompt);
+      return result.response.text().trim();
+    } catch (e) {
+      console.error('Failed to evolve bio', e);
+      return currentBio;
+    }
+  }
+
+  async rerollTask(bio: string, currentExp: ExpLevels, vibe: string): Promise<DailyTask | null> {
+    const prompt = `
+      The user wants to reroll a daily task. 
+      Their bio: "${bio}".
+      Current stats: ${JSON.stringify(currentExp)}.
+      User's current vibe/context: "${vibe}".
+      Generate ONE new personalized daily task (title and description) that fits this vibe.
+      Return the result strictly as a JSON object.
+      Example: {"title": "Indoor Yoga", "description": "A calm flexibility session for a rainy day"}
+    `;
+
+    try {
+      const result = await this.model.generateContent(prompt);
+      const text = result.response.text();
+      const jsonStr = text.match(/\{.*\}/s)?.[0] || text;
+      const task = JSON.parse(jsonStr);
+      return {
+        ...task,
+        id: Math.random().toString(36).substring(7),
+        completed: false,
+        dateCreated: new Date().toISOString(),
+      };
+    } catch (e) {
+      console.error('Failed to reroll task', e);
+      return null;
+    }
+  }
 }

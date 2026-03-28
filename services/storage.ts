@@ -75,6 +75,11 @@ export const StorageService = {
       lastWorkTimestamp: null,
       dailyTasks: [],
       lastTaskRefreshDate: null,
+      restDayTokens: 0,
+      streakCount: 0,
+      lastRerollDate: null,
+      lastBioEvolutionDate: new Date().toISOString().split('T')[0],
+      completedTaskDates: [],
     };
   }
 };

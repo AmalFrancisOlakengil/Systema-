@@ -4,12 +4,14 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAppStore } from '@/hooks/use-app-store';
 import { HelloWave } from '@/components/hello-wave';
+import { useDynamicTheme } from '@/hooks/use-dynamic-theme';
 
 export default function AddWorkScreen() {
   const [work, setWork] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [success, setSuccess] = useState(false);
   const { addWork, profile } = useAppStore();
+  const theme = useDynamicTheme();
 
   const handleAddWork = async () => {
     if (!work || isAnalyzing) return;
@@ -39,17 +41,17 @@ export default function AddWorkScreen() {
 
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: theme.text, borderColor: theme.icon, backgroundColor: 'rgba(255,255,255,0.05)' }]}
             value={work}
             onChangeText={setWork}
             placeholder="e.g. Spent 2 hours coding a new feature, or Jogged 5km."
-            placeholderTextColor="#888"
+            placeholderTextColor={theme.icon}
             multiline
             numberOfLines={4}
           />
           
           <TouchableOpacity 
-            style={[styles.button, (!work || isAnalyzing) && styles.buttonDisabled]} 
+            style={[styles.button, { backgroundColor: theme.tint }, (!work || isAnalyzing) && styles.buttonDisabled]} 
             onPress={handleAddWork}
             disabled={!work || isAnalyzing}
           >
@@ -62,7 +64,7 @@ export default function AddWorkScreen() {
         </View>
 
         {success && (
-          <View style={styles.successMessage}>
+          <View style={[styles.successMessage, { backgroundColor: theme.tint }]}>
             <ThemedText style={styles.successText}>Work added! Your stats have been updated.</ThemedText>
           </View>
         )}

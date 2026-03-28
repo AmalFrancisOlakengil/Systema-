@@ -5,13 +5,17 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAppStore } from '@/hooks/use-app-store';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { StreakCalendar } from '@/components/streak-calendar';
+import { useDynamicTheme } from '@/hooks/use-dynamic-theme';
 
 export default function StatsScreen() {
-  const { profile } = useAppStore();
+  const { profile, getRank } = useAppStore();
   const router = useRouter();
+  const theme = useDynamicTheme();
 
   if (!profile) return null;
 
+  const rank = getRank(profile);
   const { exp } = profile;
   
   // Calculate weights
@@ -34,15 +38,22 @@ export default function StatsScreen() {
       <View style={styles.header}>
         <ThemedText type="title">Status</ThemedText>
         <TouchableOpacity onPress={() => router.push('/settings')}>
-          <IconSymbol name="gear" size={24} color="#000" />
+          <IconSymbol name="gear" size={24} color={theme.text} />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileSection}>
-          <ThemedText type="subtitle">{profile.name}</ThemedText>
+          <View style={styles.nameRow}>
+            <ThemedText type="subtitle">{profile.name}</ThemedText>
+            <View style={[styles.rankBadge, { backgroundColor: theme.tint }]}>
+              <ThemedText style={styles.rankText}>{rank}</ThemedText>
+            </View>
+          </View>
           <ThemedText style={styles.bio}>{profile.bio}</ThemedText>
         </View>
+
+        <StreakCalendar />
 
         <View style={styles.overallSection}>
           <ThemedText type="defaultSemiBold">Overall Level</ThemedText>
@@ -98,6 +109,21 @@ const styles = StyleSheet.create({
   },
   profileSection: {
     marginBottom: 32,
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  rankBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  rankText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   bio: {
     opacity: 0.7,
