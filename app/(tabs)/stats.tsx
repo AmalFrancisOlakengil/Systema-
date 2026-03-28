@@ -114,6 +114,28 @@ export default function StatsScreen() {
             </View>
           ))}
         </View>
+
+        <View style={styles.mechanicsSection}>
+          <ThemedText type="defaultSemiBold" style={{ marginBottom: 8 }}>System Mechanics</ThemedText>
+          <View style={styles.mechanicItem}>
+            <IconSymbol name="arrow.clockwise" size={16} color={theme.icon} />
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.mechanicTitle}>Stat Decay</ThemedText>
+              <ThemedText style={styles.mechanicDesc}>
+                Missing a day without Rest Day Tokens results in a 5% decay across all stats and resets your streak.
+              </ThemedText>
+            </View>
+          </View>
+          <View style={styles.mechanicItem}>
+            <IconSymbol name="circle" size={16} color={theme.icon} />
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.mechanicTitle}>Rest Day Tokens</ThemedText>
+              <ThemedText style={styles.mechanicDesc}>
+                Automatically consumed to protect your stats and streak when you&apos;re inactive for a day.
+              </ThemedText>
+            </View>
+          </View>
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -259,5 +281,26 @@ const styles = StyleSheet.create({
     width: 40,
     fontSize: 14,
     textAlign: 'right',
+  },
+  mechanicsSection: {
+    marginTop: 40,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    padding: 20,
+    borderRadius: 16,
+    gap: 16,
+  },
+  mechanicItem: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  mechanicTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  mechanicDesc: {
+    fontSize: 12,
+    opacity: 0.6,
+    lineHeight: 18,
   },
 });

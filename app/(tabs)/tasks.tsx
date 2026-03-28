@@ -11,6 +11,7 @@ export default function TasksScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [rerollModalVisible, setRerollModalVisible] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isGlobalReroll, setIsGlobalReroll] = useState(false);
   const [vibe, setVibe] = useState('');
   const theme = useDynamicTheme();
 
@@ -37,11 +38,29 @@ export default function TasksScreen() {
       return;
     }
     setSelectedTaskId(id);
+    setIsGlobalReroll(false);
+    setRerollModalVisible(true);
+  };
+
+  const handleGlobalRerollPress = () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (profile?.lastRerollDate === todayStr) {
+      Alert.alert("Daily Limit Reached", "You can only reroll once per day!");
+      return;
+    }
+    setIsGlobalReroll(true);
+    setSelectedTaskId(null);
     setRerollModalVisible(true);
   };
 
   const confirmReroll = async () => {
-    if (selectedTaskId) {
+    if (isGlobalReroll) {
+      setIsRefreshing(true);
+      setRerollModalVisible(false);
+      await refreshDailyTasks(vibe || 'Surprise me');
+      setVibe('');
+      setIsRefreshing(false);
+    } else if (selectedTaskId) {
       await rerollTask(selectedTaskId, vibe || 'Surprise me');
       setRerollModalVisible(false);
       setVibe('');
@@ -62,8 +81,17 @@ export default function TasksScreen() {
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="title">Daily Tasks</ThemedText>
-        <ThemedText style={styles.countText}>{tasks.length}/3 Tasks</ThemedText>
+        <View>
+          <ThemedText type="title">Daily Tasks</ThemedText>
+          <ThemedText style={styles.countText}>{tasks.length}/3 Tasks</ThemedText>
+        </View>
+        <TouchableOpacity 
+          style={[styles.globalRerollButton, { backgroundColor: theme.tint + '20' }]} 
+          onPress={handleGlobalRerollPress}
+        >
+          <IconSymbol name="arrow.2.circlepath" size={20} color={theme.tint} />
+          <ThemedText style={{ color: theme.tint, fontWeight: '600', fontSize: 14 }}>Vibe Reroll</ThemedText>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -113,8 +141,8 @@ export default function TasksScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-            <ThemedText type="subtitle">Reroll Task</ThemedText>
-            <ThemedText style={styles.modalSub}>What's your current vibe?</ThemedText>
+            <ThemedText type="subtitle">{isGlobalReroll ? 'Reroll All Tasks' : 'Reroll Task'}</ThemedText>
+            <ThemedText style={styles.modalSub}>What&apos;s your current vibe?</ThemedText>
             <TextInput
               style={[styles.input, { color: theme.text, borderColor: theme.icon }]}
               placeholder="e.g. raining, feeling lazy, at the gym..."
@@ -158,8 +186,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
+    alignItems: 'center',
     marginBottom: 24,
+  },
+  globalRerollButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   countText: {
     fontSize: 16,

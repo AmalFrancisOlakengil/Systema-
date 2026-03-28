@@ -25,6 +25,7 @@ const MAPPING = {
   'checkmark.circle': 'check-circle',      // The "Empty" state icon
   'gear': 'settings',                      // The "Settings" icon in Stats
   'arrow.clockwise': 'refresh',            // For that reset button we discussed
+  'arrow.2.circlepath': 'sync',            // The Reroll icon
 } as IconMapping;
 
 /**

@@ -11,7 +11,7 @@ interface AppContextType {
   isLoading: boolean;
   completeOnboarding: (name: string, bio: string, key: string) => Promise<void>;
   addWork: (workDescription: string) => Promise<void>;
-  refreshDailyTasks: () => Promise<void>;
+  refreshDailyTasks: (vibe?: string) => Promise<void>;
   completeTask: (taskId: string) => Promise<void>;
   rerollTask: (taskId: string, vibe: string) => Promise<void>;
   updateApiKey: (newKey: string) => Promise<void>;
@@ -165,25 +165,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     await StorageService.saveProfile(updatedProfile);
   };
 
-  const refreshDailyTasks = async () => {
+  const refreshDailyTasks = async (vibe?: string) => {
     if (!profile || !apiKey) return;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    if (profile.lastTaskRefreshDate === todayStr && profile.dailyTasks.length >= 3) {
+    // Only skip if no vibe is provided AND tasks already exist for today
+    if (!vibe && profile.lastTaskRefreshDate === todayStr && profile.dailyTasks.length >= 3) {
       return;
     }
 
     const gemini = new GeminiService(apiKey);
-    const newTasks = await gemini.generateDailyTasks(profile.bio, profile.exp, 3);
+    const newTasks = await gemini.generateDailyTasks(profile.bio, profile.exp, 3, vibe);
 
-    const updatedProfile = {
-      ...profile,
-      dailyTasks: newTasks,
-      lastTaskRefreshDate: todayStr,
-    };
+    if (newTasks.length > 0) {
+      const updatedProfile = {
+        ...profile,
+        dailyTasks: newTasks,
+        lastTaskRefreshDate: todayStr,
+      };
 
-    setProfile(updatedProfile);
-    await StorageService.saveProfile(updatedProfile);
+      setProfile(updatedProfile);
+      await StorageService.saveProfile(updatedProfile);
+      
+      if (vibe) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    }
   };
 
   const completeTask = async (taskId: string) => {

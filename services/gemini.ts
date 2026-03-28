@@ -49,10 +49,11 @@ export class GeminiService {
     }
   }
 
-  async generateDailyTasks(bio: string, currentExp: ExpLevels, count: number): Promise<DailyTask[]> {
+  async generateDailyTasks(bio: string, currentExp: ExpLevels, count: number, vibe?: string): Promise<DailyTask[]> {
     const prompt = `
       The user's bio is: "${bio}".
       Their current EXP stats are: ${JSON.stringify(currentExp)}.
+      ${vibe ? `The user's current vibe/context is: "${vibe}". Generate tasks that fit this vibe.` : ''}
       Suggest ${count} personalized daily tasks to help them improve their stats.
       Each task should have a "title" and a short "description".
       Return the result strictly as a JSON array of objects.
