@@ -15,6 +15,7 @@ interface AppContextType {
   completeTask: (taskId: string) => Promise<void>;
   rerollTask: (taskId: string, vibe: string) => Promise<void>;
   updateApiKey: (newKey: string) => Promise<void>;
+  updateBio: (newBio: string) => Promise<void>;
   reload: () => Promise<void>;
   getRank: (profile: UserProfile) => string;
 }
@@ -22,12 +23,16 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const getRank = (profile: UserProfile) => {
-  const totalExp = Object.values(profile.exp).reduce((a, b) => a + b, 0);
-  if (totalExp >= 150) return 'Peak';
-  if (totalExp >= 100) return 'Flow State';
-  if (totalExp >= 75) return 'Mediocre';
-  if (totalExp >= 50) return 'Beginner';
-  if (totalExp >= 20) return 'Noob';
+  const { exp } = profile;
+  const mentalExp = (exp.iq + exp.eq) / 2;
+  const physicalExp = (exp.strength + exp.dexterity + exp.agility + exp.flexibility + exp.stamina) / 5;
+  const overallExp = (mentalExp + physicalExp) / 2;
+
+  if (overallExp >= 150) return 'Peak';
+  if (overallExp >= 100) return 'Flow State';
+  if (overallExp >= 75) return 'Mediocre';
+  if (overallExp >= 50) return 'Beginner';
+  if (overallExp >= 20) return 'Noob';
   return 'Trainee';
 };
 
@@ -46,7 +51,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     if (storedProfile) {
       applyPenaltyIfNeeded(storedProfile);
-      evolveBioIfNeeded(storedProfile, storedApiKey);
       NotificationService.requestPermissions();
       NotificationService.scheduleDailyReminder();
     }
@@ -54,6 +58,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadData();
+
+    const subscription = NotificationService.addListener(() => {
+      setProfile(prev => {
+        if (!prev || prev.dailyTasks.length === 0) return prev;
+        const firstTaskId = prev.dailyTasks[0].id;
+        // We can't easily call completeTask here because it's async and depends on current profile
+        // But we can trigger a reload or just let the user see the app and do it.
+        // For now, let's just alert or navigate.
+        return prev;
+      });
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [loadData]);
 
   const applyPenaltyIfNeeded = async (currentProfile: UserProfile) => {
@@ -89,29 +108,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const evolveBioIfNeeded = async (currentProfile: UserProfile, currentApiKey: string | null) => {
-    if (!currentApiKey) return;
-    
-    const lastEvolution = new Date(currentProfile.lastBioEvolutionDate || 0);
-    const now = new Date();
-    const diffDays = (now.getTime() - lastEvolution.getTime()) / (1000 * 60 * 60 * 24);
-
-    if (diffDays >= 7) {
-      const gemini = new GeminiService(currentApiKey);
-      const newBio = await gemini.evolveBio(
-        currentProfile.bio, 
-        currentProfile.completedTaskDates.slice(-10), 
-        currentProfile.exp
-      );
-
-      const updatedProfile = {
-        ...currentProfile,
-        bio: newBio,
-        lastBioEvolutionDate: now.toISOString().split('T')[0],
-      };
-      setProfile(updatedProfile);
-      await StorageService.saveProfile(updatedProfile);
-    }
+  const updateBio = async (newBio: string) => {
+    if (!profile) return;
+    const updatedProfile = { ...profile, bio: newBio };
+    setProfile(updatedProfile);
+    await StorageService.saveProfile(updatedProfile);
   };
 
   const completeOnboarding = async (name: string, bio: string, key: string) => {
@@ -265,6 +266,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       completeTask,
       rerollTask,
       updateApiKey,
+      updateBio,
       reload: loadData,
       getRank,
     }}>

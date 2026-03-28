@@ -7,6 +7,15 @@ export const NotificationService = {
     if (status !== 'granted') {
       await Notifications.requestPermissionsAsync();
     }
+    
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
   },
 
   async scheduleDailyReminder() {
@@ -25,11 +34,14 @@ export const NotificationService = {
         title: "Daily Quest Awaits!",
         body: "Don't forget to complete your tasks to maintain your streak.",
         categoryIdentifier: 'task-reminder',
+        android: {
+          channelId: 'default',
+        },
       },
       trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour: 9,
         minute: 0,
-        repeats: true,
       } as Notifications.DailyTriggerInput,
     });
   },
@@ -39,8 +51,21 @@ export const NotificationService = {
       content: {
         title: "Rank Up! 🎉",
         body: `You've achieved the rank of ${rank}! Keep pushing!`,
+        android: {
+          channelId: 'default',
+        },
       },
       trigger: null,
     });
+  },
+
+  addListener(handler: (taskId?: string) => void) {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      const actionIdentifier = response.actionIdentifier;
+      if (actionIdentifier === 'mark-done') {
+        handler();
+      }
+    });
+    return subscription;
   }
 };

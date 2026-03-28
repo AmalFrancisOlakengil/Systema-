@@ -1,3 +1,4 @@
+import { DarkTheme } from '@react-navigation/native';
 import { useAppStore } from './use-app-store';
 import { Colors } from '../constants/theme';
 import { ExpLevels } from '../types/app';
@@ -15,7 +16,14 @@ const StatColors: Record<keyof ExpLevels, string> = {
 export function useDynamicTheme() {
   const { profile } = useAppStore();
   
-  if (!profile) return Colors.dark;
+  if (!profile) return {
+    ...DarkTheme,
+    colors: {
+      ...DarkTheme.colors,
+      ...Colors.dark,
+      primary: Colors.dark.tint,
+    }
+  };
 
   const stats = profile.exp;
   const highestStat = Object.keys(stats).reduce((a, b) => 
@@ -25,6 +33,18 @@ export function useDynamicTheme() {
   const tintColor = StatColors[highestStat] || Colors.dark.tint;
 
   return {
+    ...DarkTheme,
+    dark: true,
+    colors: {
+      ...DarkTheme.colors,
+      primary: tintColor,
+      background: Colors.dark.background,
+      card: Colors.dark.background,
+      text: Colors.dark.text,
+      border: 'rgba(255,255,255,0.1)',
+      notification: tintColor,
+    },
+    // Keep custom properties for components that expect them
     ...Colors.dark,
     tint: tintColor,
     tabIconSelected: tintColor,

@@ -18,7 +18,7 @@ export default function StatsScreen() {
   const rank = getRank(profile);
   const { exp } = profile;
   
-  // Calculate weights
+  // Calculate weights (matching getRank logic)
   const mentalExp = (exp.iq + exp.eq) / 2;
   const physicalExp = (exp.strength + exp.dexterity + exp.agility + exp.flexibility + exp.stamina) / 5;
   const overallExp = (mentalExp + physicalExp) / 2;
@@ -33,6 +33,10 @@ export default function StatsScreen() {
     { label: 'Stamina', value: exp.stamina, color: '#4AE2E2' },
   ];
 
+  // Rest Day Progress
+  const restDayProgress = (profile.streakCount % 7) / 7;
+  const daysUntilRestDay = 7 - (profile.streakCount % 7);
+
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
@@ -46,7 +50,7 @@ export default function StatsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.nameRow}>
             <ThemedText type="subtitle">{profile.name}</ThemedText>
-            <View style={[styles.rankBadge, { backgroundColor: theme.tint }]}>
+            <View style={[styles.rankBadge, { backgroundColor: theme.colors.primary }]}>
               <ThemedText style={styles.rankText}>{rank}</ThemedText>
             </View>
           </View>
@@ -70,7 +74,31 @@ export default function StatsScreen() {
           </View>
         </View>
 
+        <View style={styles.tokenSection}>
+          <View style={styles.tokenHeader}>
+            <ThemedText type="defaultSemiBold">Rest Day Tokens</ThemedText>
+            <View style={[styles.tokenCount, { backgroundColor: theme.colors.primary }]}>
+              <ThemedText style={styles.tokenCountText}>{profile.restDayTokens}</ThemedText>
+            </View>
+          </View>
+          <ThemedText style={styles.tokenDesc}>
+            Earn a Rest Day for every 7 days of perfect streaks.
+          </ThemedText>
+          <View style={styles.progressBarContainer}>
+            <View 
+              style={[
+                styles.progressBarFill, 
+                { width: `${restDayProgress * 100}%`, backgroundColor: theme.colors.primary }
+              ]} 
+            />
+          </View>
+          <ThemedText style={styles.progressText}>
+            {daysUntilRestDay === 7 ? 'New week started!' : `${daysUntilRestDay} more days until next token`}
+          </ThemedText>
+        </View>
+
         <View style={styles.statsContainer}>
+          <ThemedText type="defaultSemiBold" style={{ marginBottom: 8 }}>Detailed Stats</ThemedText>
           {stats.map((stat) => (
             <View key={stat.label} style={styles.statRow}>
               <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
@@ -130,19 +158,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
  overallSection: {
-  backgroundColor: 'rgba(0,0,0,0.05)',
+  backgroundColor: 'rgba(255,255,255,0.05)',
   padding: 24,
-  paddingVertical: 32, // Increase vertical padding
+  paddingVertical: 32,
   borderRadius: 16,
   alignItems: 'center',
-  marginBottom: 32,
+  marginBottom: 24,
 },
  overallValue: {
   fontSize: 48,
   fontWeight: 'bold',
   marginVertical: 8,
-  lineHeight: 56, // Add this: should be ~15-20% larger than fontSize
-  textAlignVertical: 'center', // Helps on Android
+  lineHeight: 56,
+  textAlignVertical: 'center',
 },
   balanceContainer: {
     flexDirection: 'row',
@@ -159,6 +187,51 @@ const styles = StyleSheet.create({
   balanceValue: {
     fontWeight: '600',
   },
+  tokenSection: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 32,
+  },
+  tokenHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  tokenCount: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tokenCountText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  tokenDesc: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginBottom: 12,
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  progressText: {
+    fontSize: 12,
+    textAlign: 'right',
+    opacity: 0.5,
+  },
   statsContainer: {
     gap: 16,
   },
@@ -174,7 +247,7 @@ const styles = StyleSheet.create({
   barBackground: {
     flex: 1,
     height: 12,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 6,
     overflow: 'hidden',
   },

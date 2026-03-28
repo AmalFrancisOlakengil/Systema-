@@ -1,19 +1,19 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useAppStore } from '@/hooks/use-app-store';
 import { AppProvider } from '@/context/app-context';
+import { useDynamicTheme } from '@/hooks/use-dynamic-theme';
 
 export const unstable_settings = {
   anchor: '(tabs)',
 };
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const dynamicTheme = useDynamicTheme();
   const { profile, apiKey, isLoading } = useAppStore();
   const segments = useSegments();
   const router = useRouter();
@@ -34,7 +34,7 @@ function RootLayoutNav() {
   }, [profile, apiKey, isLoading, segments]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={dynamicTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />

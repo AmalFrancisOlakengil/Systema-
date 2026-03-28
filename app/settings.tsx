@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAppStore } from '@/hooks/use-app-store';
 import { GeminiService } from '@/services/gemini';
 import { useRouter } from 'expo-router';
+import { useDynamicTheme } from '@/hooks/use-dynamic-theme';
 
 export default function SettingsScreen() {
-  const { apiKey, updateApiKey } = useAppStore();
+  const { apiKey, updateApiKey, profile, updateBio } = useAppStore();
   const [newKey, setNewKey] = useState(apiKey || '');
+  const [newBio, setNewBio] = useState(profile?.bio || '');
   const [isValidating, setIsValidating] = useState(false);
   const router = useRouter();
+  const theme = useDynamicTheme();
 
-  const handleUpdate = async () => {
+  const handleUpdateKey = async () => {
     if (!newKey) return Alert.alert('Error', 'Please enter an API Key');
     
     setIsValidating(true);
@@ -22,44 +25,72 @@ export default function SettingsScreen() {
 
     if (isValid) {
       await updateApiKey(newKey);
-      Alert.alert('Success', 'API Key updated successfully', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      Alert.alert('Success', 'API Key updated successfully');
     } else {
       Alert.alert('Error', 'Invalid API Key. Please check and try again.');
     }
   };
 
+  const handleUpdateBio = async () => {
+    if (!newBio) return Alert.alert('Error', 'Bio cannot be empty');
+    await updateBio(newBio);
+    Alert.alert('Success', 'Bio updated successfully');
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <View style={styles.section}>
-        <ThemedText type="defaultSemiBold">Gemini API Key</ThemedText>
-        <ThemedText style={styles.description}>
-          Update your Gemini API key here. Make sure it's a valid key from Google AI Studio.
-        </ThemedText>
-        <TextInput
-          style={styles.input}
-          value={newKey}
-          onChangeText={setNewKey}
-          placeholder="Enter API Key"
-          placeholderTextColor="#888"
-          secureTextEntry
-        />
-        
-        <TouchableOpacity 
-          style={[styles.button, isValidating && styles.buttonDisabled]} 
-          onPress={handleUpdate}
-          disabled={isValidating}
-        >
-          <ThemedText style={styles.buttonText}>
-            {isValidating ? 'Validating...' : 'Update API Key'}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.section}>
+          <ThemedText type="defaultSemiBold">Gemini API Key</ThemedText>
+          <ThemedText style={styles.description}>
+            Update your Gemini API key here. Make sure it's a valid key from Google AI Studio.
           </ThemedText>
-        </TouchableOpacity>
-      </View>
+          <TextInput
+            style={[styles.input, { color: theme.text, borderColor: theme.icon, backgroundColor: 'rgba(255,255,255,0.05)' }]}
+            value={newKey}
+            onChangeText={setNewKey}
+            placeholder="Enter API Key"
+            placeholderTextColor={theme.icon}
+            secureTextEntry
+          />
+          
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: theme.tint }, isValidating && styles.buttonDisabled]} 
+            onPress={handleUpdateKey}
+            disabled={isValidating}
+          >
+            <ThemedText style={styles.buttonText}>
+              {isValidating ? 'Validating...' : 'Update API Key'}
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.footer}>
-        <ThemedText style={styles.version}>App Version 1.0.0</ThemedText>
-      </View>
+        <View style={[styles.section, { marginTop: 40 }]}>
+          <ThemedText type="defaultSemiBold">Edit Bio</ThemedText>
+          <ThemedText style={styles.description}>
+            Your bio helps Gemini personalize your daily tasks.
+          </ThemedText>
+          <TextInput
+            style={[styles.input, styles.bioInput, { color: theme.text, borderColor: theme.icon, backgroundColor: 'rgba(255,255,255,0.05)' }]}
+            value={newBio}
+            onChangeText={setNewBio}
+            placeholder="Tell Gemini about yourself..."
+            placeholderTextColor={theme.icon}
+            multiline
+          />
+          
+          <TouchableOpacity 
+            style={[styles.button, { backgroundColor: theme.tint }]} 
+            onPress={handleUpdateBio}
+          >
+            <ThemedText style={styles.buttonText}>Update Bio</ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.footer}>
+          <ThemedText style={styles.version}>App Version 1.1.0</ThemedText>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -67,7 +98,10 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
     padding: 24,
+    paddingBottom: 40,
   },
   section: {
     gap: 12,
@@ -80,14 +114,15 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: '#fff',
+  },
+  bioInput: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
@@ -101,10 +136,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   footer: {
-    flex: 1,
-    justifyContent: 'flex-end',
+    marginTop: 60,
     alignItems: 'center',
-    paddingBottom: 20,
   },
   version: {
     fontSize: 12,

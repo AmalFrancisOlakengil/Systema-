@@ -35,8 +35,8 @@ export function StreakCalendar() {
         {now.toLocaleString('default', { month: 'long' })} {currentYear}
       </Text>
       <View style={styles.grid}>
-        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-          <Text key={day} style={[styles.headerDay, { color: theme.icon }]}>{day}</Text>
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+          <Text key={`header-${index}`} style={[styles.headerDay, { color: theme.icon }]}>{day}</Text>
         ))}
         {days.map((day, index) => (
           <View key={index} style={styles.dayContainer}>
