@@ -1,23 +1,30 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useAppStore } from '@/hooks/use-app-store';
-import { GeminiService } from '@/services/gemini';
-import { useRouter } from 'expo-router';
-import { useDynamicTheme } from '@/hooks/use-dynamic-theme';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { useAppStore } from "@/hooks/use-app-store";
+import { useDynamicTheme } from "@/hooks/use-dynamic-theme";
+import { GeminiService } from "@/services/gemini";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function SettingsScreen() {
   const { apiKey, updateApiKey, profile, updateBio } = useAppStore();
-  const [newKey, setNewKey] = useState(apiKey || '');
-  const [newBio, setNewBio] = useState(profile?.bio || '');
+  const [newKey, setNewKey] = useState(apiKey || "");
+  const [newBio, setNewBio] = useState(profile?.bio || "");
   const [isValidating, setIsValidating] = useState(false);
   const router = useRouter();
   const theme = useDynamicTheme();
 
   const handleUpdateKey = async () => {
-    if (!newKey) return Alert.alert('Error', 'Please enter an API Key');
-    
+    if (!newKey) return Alert.alert("Error", "Please enter an API Key");
+
     setIsValidating(true);
     const gemini = new GeminiService(newKey);
     const isValid = await gemini.validateApiKey();
@@ -25,16 +32,16 @@ export default function SettingsScreen() {
 
     if (isValid) {
       await updateApiKey(newKey);
-      Alert.alert('Success', 'API Key updated successfully');
+      Alert.alert("Success", "API Key updated successfully");
     } else {
-      Alert.alert('Error', 'Invalid API Key. Please check and try again.');
+      Alert.alert("Error", "Invalid API Key. Please check and try again.");
     }
   };
 
   const handleUpdateBio = async () => {
-    if (!newBio) return Alert.alert('Error', 'Bio cannot be empty');
+    if (!newBio) return Alert.alert("Error", "Bio cannot be empty");
     await updateBio(newBio);
-    Alert.alert('Success', 'Bio updated successfully');
+    Alert.alert("Success", "Bio updated successfully");
   };
 
   return (
@@ -43,24 +50,36 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <ThemedText type="defaultSemiBold">Gemini API Key</ThemedText>
           <ThemedText style={styles.description}>
-            Update your Gemini API key here. Make sure it's a valid key from Google AI Studio.
+            Update your Gemini API key here. Make sure it's a valid key from
+            Google AI Studio.
           </ThemedText>
           <TextInput
-            style={[styles.input, { color: theme.text, borderColor: theme.icon, backgroundColor: 'rgba(255,255,255,0.05)' }]}
+            style={[
+              styles.input,
+              {
+                color: "black",
+                borderColor: theme.icon,
+                backgroundColor: "rgba(255,255,255,0.05)",
+              },
+            ]}
             value={newKey}
             onChangeText={setNewKey}
             placeholder="Enter API Key"
             placeholderTextColor={theme.icon}
             secureTextEntry
           />
-          
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: theme.tint }, isValidating && styles.buttonDisabled]} 
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              { backgroundColor: theme.tint },
+              isValidating && styles.buttonDisabled,
+            ]}
             onPress={handleUpdateKey}
             disabled={isValidating}
           >
             <ThemedText style={styles.buttonText}>
-              {isValidating ? 'Validating...' : 'Update API Key'}
+              {isValidating ? "Validating..." : "Update API Key"}
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -71,16 +90,24 @@ export default function SettingsScreen() {
             Your bio helps Gemini personalize your daily tasks.
           </ThemedText>
           <TextInput
-            style={[styles.input, styles.bioInput, { color: theme.text, borderColor: theme.icon, backgroundColor: 'rgba(255,255,255,0.05)' }]}
+            style={[
+              styles.input,
+              styles.bioInput,
+              {
+                color: theme.colors.primary,
+                borderColor: theme.icon,
+                backgroundColor: "rgba(255,255,255,0.05)",
+              },
+            ]}
             value={newBio}
             onChangeText={setNewBio}
             placeholder="Tell Gemini about yourself..."
             placeholderTextColor={theme.icon}
             multiline
           />
-          
-          <TouchableOpacity 
-            style={[styles.button, { backgroundColor: theme.tint }]} 
+
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.tint }]}
             onPress={handleUpdateBio}
           >
             <ThemedText style={styles.buttonText}>Update Bio</ThemedText>
@@ -101,7 +128,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 24,
-    paddingBottom: 40,
+    paddingBottom: 250,
   },
   section: {
     gap: 12,
@@ -120,24 +147,24 @@ const styles = StyleSheet.create({
   },
   bioInput: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   button: {
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 12,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
   footer: {
     marginTop: 60,
-    alignItems: 'center',
+    alignItems: "center",
   },
   version: {
     fontSize: 12,
